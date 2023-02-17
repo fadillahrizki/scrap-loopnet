@@ -190,6 +190,8 @@ async function run(browser, page, pageNumber = 1){
         var PricePer = ""
         var LotSize = ""
         var NoStories = ""
+        var mapLat = ""
+        var mapLong = ""
 
         try{
             try{
@@ -300,6 +302,18 @@ async function run(browser, page, pageNumber = 1){
             console.log("Error: NoStories")
         }
 
+        try{
+            mapLat = await newPage.$eval('.rangemap', el=>el.getAttribute("listing-lat"))
+        }catch{
+            console.log("Error: Lat")
+        }
+
+        try{
+            mapLong = await newPage.$eval('.rangemap', el=>el.getAttribute("listing-lng"))
+        }catch{
+            console.log("Error: Long")
+        }
+
         console.log("SaleCondition : " + SaleCondition)
         console.log("SaleType : " + SaleType)
         console.log("BuildingSize : " + BuildingSize)
@@ -310,17 +324,8 @@ async function run(browser, page, pageNumber = 1){
         console.log("PricePer : " + PricePer)
         console.log("LotSize : " + LotSize)
         console.log("NoStories : " + NoStories)
-
-        // var mapLat = ""
-        // var mapLong = ""
-
-        // newPage.waitForSelector("#mapState").then(async ()=>{
-        //     mapLat = await newPage.$eval("#mapState .ng-isolate-scope", el => el.getAttribute("lat"))
-        //     mapLong = await newPage.$eval("#mapState .ng-isolate-scope", el => el.getAttribute("long"))
-        // })
-        
-        // console.log("Lat: " + mapLat)
-        // console.log("Long: " + mapLong)
+        console.log("Lat: " + mapLat)
+        console.log("Long: " + mapLong)        
 
         console.log("---- End Item : " + pageNumber + ":" + (index+1))
 
