@@ -3,6 +3,7 @@ const puppeteer = require('puppeteer');
 const fs = require('fs');
 const cities = require('./cities.json');
 const states = require('./states.json');
+var download = require('image-downloader');
 
 (async () => {
     // Launch the browser=
@@ -32,7 +33,7 @@ const states = require('./states.json');
     
         var pageNumber = 1
     
-        await run(browser, page, pageNumber)
+        await run(browser, page, "state", countStates, pageNumber)
     
         while(true){
     
@@ -47,7 +48,7 @@ const states = require('./states.json');
                     timeout: 0
                 })
         
-                await run(browser, page, pageNumber)
+                await run(browser, page, "state", countStates, pageNumber)
             }catch{
                 break
             }
@@ -84,7 +85,7 @@ const states = require('./states.json');
     
         var pageNumber = 1
     
-        await run(browser, page, pageNumber)
+        await run(browser, page, "city", countCities, pageNumber)
     
         while(true){
     
@@ -99,7 +100,7 @@ const states = require('./states.json');
                     timeout: 0
                 })
         
-                await run(browser, page, pageNumber)
+                await run(browser, page, "city", countCities, pageNumber)
             }catch{
                 break
             }
@@ -121,7 +122,7 @@ const states = require('./states.json');
 })();
 
 
-async function run(browser, page, pageNumber = 1){
+async function run(browser, page, type, count, pageNumber = 1){
     const targets = await page.$$('.placard')
     const ua = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.181 Safari/537.36"
 
@@ -177,6 +178,25 @@ async function run(browser, page, pageNumber = 1){
         const images = await newPage.$$eval('img.figure', options => {
             return options.map((option) => option.getAttribute('src'))
         })
+
+        var imageCounts = 1
+
+        for(const image of images){
+            if(!image) continue
+            const options = {
+                url: image,
+                dest: '../../images/'+ type + "-" + count + "-" + pageNumber + "-" + (index+1) +  "-" + imageCounts + ".jpg",
+                extractFilename: false,
+            };
+
+            download.image(options)
+            .then(({ filename }) => {
+                console.log('Saved to', filename); // saved to /path/to/dest/image.jpg
+            })
+            .catch((err) => console.error(err));
+
+            imageCounts++
+        }
 
         console.log("images: " + images)
 
