@@ -185,8 +185,7 @@ async function run(browser, page, type, count, pageNumber = 1){
             if(!image) continue
             const options = {
                 url: image,
-                dest: '../../images/'+ type + "-" + count + "-" + pageNumber + "-" + (index+1) +  "-" + imageCounts + ".jpg",
-                extractFilename: false,
+                dest: '../../images/'+ type + "-" + count + "-" + pageNumber + "-" + (index+1) +  "-" + imageCounts + ".jpg"
             };
 
             download.image(options)
