@@ -159,7 +159,12 @@ async function run(browser, page, type, count, pageNumber = 1){
             });
         })
 
-        console.log("addresses: " + addresses)
+        // console.log("addresses: " + addresses)
+
+        console.log("Kategori: " + addresses[0])
+        console.log("State: " + addresses[1])
+        console.log("City: " + addresses[2])
+        console.log("address: " + addresses[3])
 
         if(addresses[addresses.length-1] == false) continue
         
@@ -167,7 +172,7 @@ async function run(browser, page, type, count, pageNumber = 1){
             return options.map((option) => option.getAttribute("title"))
         })
 
-        console.log("contactName: " + contactName)
+        console.log("contactName: " + contactName[0])
 
         const contactNumber = await newPage.$$eval('.cta-phone-number .phone-number', options => {
             return options.map((option) => option.textContent)
@@ -182,7 +187,9 @@ async function run(browser, page, type, count, pageNumber = 1){
         var imageCounts = 1
 
         for(const image of images){
-            if(!image) continue
+            if(imageCounts > 3) break;
+            if(!image) continue;
+
             const options = {
                 url: image,
                 dest: '../../images/'+ type + "-" + count + "-" + pageNumber + "-" + (index+1) +  "-" + imageCounts + ".webp"
