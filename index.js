@@ -1,9 +1,18 @@
 // Import puppeteer
 const puppeteer = require('puppeteer');
-const fs = require('fs');
+// const fs = require('fs');
 const cities = require('./cities.json');
 const states = require('./states.json');
 var download = require('image-downloader');
+
+var mysql = require('mysql');
+
+var conn = mysql.createConnection({
+  host: "localhost",
+  user: "root",
+  password: "root",
+  database: "loopnet"
+});
 
 (async () => {
     // Launch the browser=
@@ -159,26 +168,15 @@ async function run(browser, page, type, count, pageNumber = 1){
             });
         })
 
+        
+        if(addresses[addresses.length-1] == false) continue
+        
         // console.log("addresses: " + addresses)
 
         console.log("Kategori: " + addresses[0])
         console.log("State: " + addresses[1])
         console.log("City: " + addresses[2])
         console.log("address: " + addresses[3])
-
-        if(addresses[addresses.length-1] == false) continue
-        
-        const contactName = await newPage.$$eval('.contact', options => {
-            return options.map((option) => option.getAttribute("title"))
-        })
-
-        console.log("contactName: " + contactName[0])
-
-        const contactNumber = await newPage.$$eval('.cta-phone-number .phone-number', options => {
-            return options.map((option) => option.textContent)
-        })
-
-        console.log("contactNumber: " + contactNumber)
 
         const images = await newPage.$$eval('img.figure', options => {
             return options.map((option) => option.getAttribute('src'))
@@ -206,6 +204,10 @@ async function run(browser, page, type, count, pageNumber = 1){
 
         console.log("images: " + images)
 
+        var name = ""
+        var contactName = ""
+        var contactNumber = ""
+
         var SaleCondition = ""
         var SaleType = ""
         var BuildingSize = ""
@@ -218,6 +220,27 @@ async function run(browser, page, type, count, pageNumber = 1){
         var NoStories = ""
         var mapLat = ""
         var mapLong = ""
+
+        try{
+            name = await newPage.$eval('.profile-hero-title', (option) => option.textContent.trim())
+            console.log("name: " + name)
+        }catch{
+            console.log("Error: name")
+        }
+
+        try{
+            contactName = await newPage.$eval('.contact', (option) => option.getAttribute("title"))
+            console.log("contactName: " + contactName)
+        }catch{
+            console.log("Error: contactName")
+        }
+
+        try{
+            contactNumber = await newPage.$eval('.cta-phone-number .phone-number', (option) => option.textContent.trim())
+            console.log("contactNumber: " + contactNumber)
+        }catch{
+            console.log("Error: contactNumber")
+        }
 
         try{
             try{
@@ -351,7 +374,19 @@ async function run(browser, page, type, count, pageNumber = 1){
         console.log("LotSize : " + LotSize)
         console.log("NoStories : " + NoStories)
         console.log("Lat: " + mapLat)
-        console.log("Long: " + mapLong)        
+        console.log("Long: " + mapLong)  
+        
+        conn.connect(function(err) {
+            if (err) throw err;
+
+            var sql = `INSERT INTO products (name, link, category, state, city, address, contact_name, contact_number, sale_condition, sale_type,building_size,building_class,year_built,property_sub_type,price, price_per,lot_size,no_stories,latitude,
+                longitude) VALUES ("${name}", "${link}", "${addresses[0]}", "${addresses[1]}", "${addresses[2]}", "${addresses[3]}", "${contactName}", "${contactNumber}", "${SaleCondition}", "${SaleType}","${BuildingSize}","${BuildingClass}","${YearBuilt}","${PropertySubtype}","${Price}", "${PricePer}","${LotSize}","${NoStories}","${mapLat}","${mapLong}")`
+
+            conn.query(sql, function (err, result) {
+                if (err) throw err;
+                console.log("1 record inserted")
+            });
+        });
 
         console.log("---- End Item : " + pageNumber + ":" + (index+1))
 
